@@ -1,9 +1,46 @@
 // Register a new patient
 export const registerPatient = async (req, res, next) => {
+  const {
+    fullName,
+    email,
+    phone,
+    password,
+    age,
+    gender,
+    confirmPassword,
+    address,
+    profilePicture,
+    familyContact,
+  } = req.body;
   try {
-    const { fullname, email } = req.body;
-console.log(fullname)
-
+    // Check if the required fields are present
+    if (
+      !fullName ||
+      !email ||
+      !phone ||
+      !password ||
+      !age ||
+      !gender ||
+      !familyContact
+    ) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+    // Check the family contact details is present
+    const { relativeName, relativePhone, relation } = familyContact;
+    if (!relativeName || !relativePhone || !relation) {
+      return res
+        .status(400)
+        .json({ message: "Family contact details are required" });
+    }
+    // check password and conform password are same
+    if (password !== confirmPassword) {
+      return res.status(422).json({ message: "Passwords do not match" });
+    }
+    // Check if the user already exists
+    const existingUser = await Patient.findOne({ email });
+    if (existingUser) {
+      return res.status(409).json({ message: "User already exists" });
+    }
   } catch (err) {
     next(err); // Pass unexpected errors to error handler
   }
