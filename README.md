@@ -11,6 +11,7 @@
 Modular Monolithic Architecture
 
 ** Why Modular Monolithic? **
+
 - I chose Modular Monolithic Architecture to organize the project by feature-based modules like patients, doctors, and admin. This structure keeps - the code clean, scalable, and easy to maintain, even as the project grows. It allows clear separation of concerns while keeping everything in a - single deployable backend, making development faster and more efficient.
 
 /healthcare-app
@@ -57,6 +58,30 @@ Install the following packages:
 ---
 
 **\*\*\*\***\*\***\*\*\*\***-------------Models---------------\***\*\*\*\*\***\*\*\*\***\*\*\*\*\***
+
+### Core Models
+
+-**patient_model**
+
+- Fields: `name`, `age`, `gender`, `email`, `password`, `contactNumber`, `age`, `gender`, `address`, profilePicture`,...etc
+- Family Contact:
+  ```js
+  familyContact: {
+    name: String,
+    relationship: String,
+    contactNumber: String,
+    isEmergencyContact: { type: Boolean, default: false }
+  }
+  ```
+- Role: `'patient'`
+- Use `bcrypt` to hash the password
+
+-**temp_patient_model**
+
+- OTP
+- expire OTP
+- Clear it after creating new patient
+
 **\*\*\*\***\*\***\*\*\*\***-------------Controllers---------------\***\*\*\*\*\***\*\*\*\***\*\*\*\*\***
 **\*\*\*\***\*\***\*\*\*\***-------------Routes---------------\***\*\*\*\*\***\*\*\*\***\*\*\*\*\***
 **\*\*\*\***\*\***\*\*\*\***-------------Middlewares---------------\***\*\*\*\*\***\*\*\*\***\*\*\*\*\***
