@@ -4,7 +4,8 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
-import { connectDb } from "./configs/database.js";
+import { connectDb } from "./src/configs/database.js";
+
 
 const PORT = 4000;
 const app = express();
