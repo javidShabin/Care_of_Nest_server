@@ -56,11 +56,13 @@ Install the following packages:
 - Install and configure `mongoose` to connect the server with the MongoDB database
 
 ---
+
 ### **Models**
 
 #### **Core Models**
 
 1. **patient_model**
+
    - **Fields**:
      - `name`, `age`, `gender`, `email`, `password`, `contactNumber`, `address`, `profilePicture`, etc.
    - **Family Contact**:
@@ -87,30 +89,35 @@ Install the following packages:
 
 ### **Controllers**
 
-- *Insert description or controller details here.*
+- _Insert description or controller details here._
 
 ---
 
 ### **Routes**
 
-- *Insert description or routes details here.*
+- _Insert description or routes details here._
 
 ---
 
 ### **Middlewares**
 
-- *Insert middleware functionality or details here.*
+- _Error Handler middleware_
+
+- A centralized error handler middleware is used to catch and handle errors across the entire application.
+- It ensures consistent error responses and improves debugging by conditionally showing stack traces in development
 
 ---
 
 ### **Configs**
 
 1. **cloudinary**
+
    - Cloudinary is integrated to manage image uploads in the project.
    - It handles storage, optimization, and transformation of images seamlessly.
    - This helps deliver high-quality media content efficiently across the platform.
 
 2. **database**
+
    - Mongoose is used to connect the application to MongoDB.
    - A custom `connectDb` function handles the connection using `mongoose.connect()`.
    - The database URL is securely stored in environment variables (`.env`).
