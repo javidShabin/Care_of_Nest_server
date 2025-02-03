@@ -19,6 +19,10 @@ app.use(cors({
 }));
 app.use(cookieParser()); // Cookie parser
 
+app.use("/", (req, res) => {
+  res.json({message: "Hello world"})
+})
+
 // Start the server
 connectDb()
   .then(() => {
