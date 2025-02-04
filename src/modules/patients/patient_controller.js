@@ -1,5 +1,6 @@
 import transporter from "../../configs/nodemailer.js";
 import { createError } from "../../utils/createError.js";
+import { generateUserToken } from "../../utils/token.js";
 import Patient from "./patient_model.js";
 import TempPatient from "./temp_patient_model.js";
 import bcrypt from "bcrypt";
@@ -90,14 +91,58 @@ export const registerPatient = async (req, res, next) => {
 
 // Verify OTP and create patient account
 export const verifyOtpAndCreatePatient = async (req, res, next) => {
-   // Destructer the emial and otp from request body
+  // Destructer the emial and otp from request body
   const { email, otp } = req.body;
   try {
     if (!email || !otp) {
       return next(createError(400, "Email and OTP are required"));
     }
+    // Find the temporary patient by email
+    const tempPatient = await TempPatient.findOne({ email });
+    if (!tempPatient) {
+      return next(createError(404, "User not found"));
+    }
+    // verify the OTP same or not
+    if (tempPatient.otp !== otp) {
+      return next(createError(400, "Invalid OTP"));
+    }
+    // Check the OTP expire or not
+    if (tempPatient.otpExpiresAt < Date.now()) {
+      return next(createError(400, "OTP has expired"));
+    }
+    // Create new patient and save the user
+    const newPatient = new Patient({
+      fullName: tempPatient.fullName,
+      email: tempPatient.email,
+      phone: tempPatient.phone,
+      password: tempPatient.password,
+      age: tempPatient.age,
+      gender: tempPatient.gender,
+      profilePicture: tempPatient.profilePicture,
+      address: tempPatient.address,
+      familyContact: tempPatient.familyContact,
+      reports: tempPatient.reports,
+    });
+    await newPatient.save();
+    // Generate patient token using patient id, email and role
+    const token = generateUserToken({
+      _id: newPatient._id,
+      email: newPatient.email,
+      role: "patient",
+    });
+    // Set the token to cookie
+    res.cookie("patientToken", token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "strict",
+    });
+    await TempPatient.deleteOne({ email });
+    res.status(201).json({
+      success: true,
+      message: "User created successfully",
+    });
   } catch (error) {
-    
+    next(error)
   }
 };
 
