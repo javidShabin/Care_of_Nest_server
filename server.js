@@ -1,37 +1,44 @@
+// server.js
 import dotenv from "dotenv";
 dotenv.config();
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
-import { connectDb } from "./src/configs/database.js";
-import router from "./src/app.js";
+import { connectDb } from "./src/configs/database.js"; // Correct path to database.js inside src
+import app from "./src/app.js";
 
 
-const PORT = 4000;
-const app = express();
+const PORT = process.env.PORT || 4000; // Use dynamic port if available
+
+const server = express();
 
 // Middleware
-app.use(helmet());
-app.use(express.json());
-app.use(cors({
+server.use(helmet());
+server.use(express.json());
+server.use(
+  cors({
     origin: true,
-    credentials: true
-}));
-app.use(cookieParser()); // Cookie parser
+    credentials: true,
+  })
+);
+server.use(cookieParser()); // Cookie parser
 
-app.use("/", (req, res) => {
-  res.json({message: "Hello world"})
-})
+// Mount the routes defined in app.js
+server.use("/app", app);
 
-app.use("/app", router)
+server.use("/", (req, res) => {
+  res.json({ message: "Hello world" });
+});
 
-// Start the server
+
+
+// Start the server after database connection
 connectDb()
   .then(() => {
-    console.log("Connected to MongoDB"); // First connect the databse
-    app.listen(PORT, () => {
-      // Then start the server
+    console.log("Connected to MongoDB"); // First, connect to the database
+    server.listen(PORT, () => {
+      // Then, start the server
       console.log(`Server is running on port ${PORT}`);
     });
   })

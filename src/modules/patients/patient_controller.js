@@ -1,5 +1,13 @@
 // Register a new patient
-export const registerPatient = async (req, res, next) => {};
+export const registerPatient = async (req, res, next) => {
+  try {
+    const { fullname, email } = req.body;
+console.log(fullname)
+
+  } catch (err) {
+    next(err); // Pass unexpected errors to error handler
+  }
+};
 
 // Verify OTP and create patient account
 export const verifyOtpAndCreatePatient = async (req, res, next) => {};
