@@ -1,15 +1,14 @@
 // app.js
 import express from "express";
 
-import { registerPatient } from "./modules/patients/patient_controller.js";
 import errorHandler from "./middlewares/errorHandler.js";
+import apiRouter from "./api.js";
 
 const app = express();
 
 app.use(express.json());  // Parse JSON
 
-// Register route
-app.post("/register", registerPatient);
+app.use("/api", apiRouter)
 
 // Global error handler
 app.use(errorHandler);
