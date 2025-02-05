@@ -41,6 +41,8 @@ export const registerPatient = async (req, res, next) => {
     if (existingUser) {
       return res.status(409).json({ message: "User already exists" });
     }
+    // Generate 6 degit OTP for user email conformation
+    const otp = Math.floor(100000 + Math.random() * 900000);
   } catch (err) {
     next(err); // Pass unexpected errors to error handler
   }
