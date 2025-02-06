@@ -1,3 +1,6 @@
+import transporter from "../../configs/nodemailer.js";
+import TempPatient from "./temp_patient_model.js";
+
 // Register a new patient
 export const registerPatient = async (req, res, next) => {
   const {
@@ -43,6 +46,38 @@ export const registerPatient = async (req, res, next) => {
     }
     // Generate 6 degit OTP for user email conformation
     const otp = Math.floor(100000 + Math.random() * 900000);
+     // setUp email message details
+    const mailOptions = {
+      from: process.env.EMAIL, // From email
+      to: email, // To email from user
+      subject: "Your OTP for Registration",
+      text: `Your OTP is ${otp}. Please verify to complete your registration.`,
+    };
+    // Send the mail with creating mail details
+    await transporter.sendMail(mailOptions);
+
+    // Save or update temporary patient data with OTP
+    await TempPatient.findOneAndUpdate(
+      { email },
+      {
+        fullName,
+        email,
+        password: hashedPassword,
+        otp,
+        otpExpiresAt: Date.now() + 10 * 60 * 1000, // OTP expires in 10 minutes
+        phone,
+        age,
+        gender,
+        address,
+        profilePicture,
+        familyContact,
+      },
+      { upsert: true, new: true }
+    );
+    return res.status(200).json({
+      success: true,
+      message: "OTP sent to your email. Please verify within 10 minutes.",
+    });
   } catch (err) {
     next(err); // Pass unexpected errors to error handler
   }

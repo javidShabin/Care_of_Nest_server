@@ -89,6 +89,13 @@ Install the following packages:
 
 ### **Controllers**
 
+1. **patient_controller
+    -**Register 
+     -Check the petient exist
+     -Generate OTP
+     -Send the OTP to email using nodemailer
+     -Save the datails in temp patient model
+
 - _Insert description or controller details here._
 
 ---
