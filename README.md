@@ -89,16 +89,21 @@ Install the following packages:
 
 ### **Controllers**
 
-1. **patient_controller
-    -**Register 
-     -Check the petient exist
-     -Generate OTP
-     -Send the OTP to email using nodemailer
-     -Hash patient password using bcrypt
-     -Save the datails in temp patient model
+1. # **patient_controller**
 
+   -**Register**
+   -Check the petient exist
+   -Generate OTP
+   -Send the OTP to email using nodemailer
+   -Hash patient password using bcrypt
+   -Save the datails in temp patient model
 
-- _Insert description or controller details here._
+   -**Verify_and_Create_patient**
+   -Find the patient using email
+   -Cerify the OTP
+   -Generate token using becrypt
+   -Save the details in database as amain patient
+   -Clear the temp patient from database
 
 ---
 
