@@ -1,5 +1,7 @@
 import transporter from "../../configs/nodemailer.js";
+import Patient from "./patient_model.js";
 import TempPatient from "./temp_patient_model.js";
+import bcrypt from "bcrypt"
 
 // Register a new patient
 export const registerPatient = async (req, res, next) => {
@@ -55,6 +57,10 @@ export const registerPatient = async (req, res, next) => {
     };
     // Send the mail with creating mail details
     await transporter.sendMail(mailOptions);
+
+    // Hash the patient passowrd
+    const salt = 10;
+    const hashedPassword = await bcrypt.hash(password, salt);
 
     // Save or update temporary patient data with OTP
     await TempPatient.findOneAndUpdate(

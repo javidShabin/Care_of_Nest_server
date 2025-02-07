@@ -94,7 +94,9 @@ Install the following packages:
      -Check the petient exist
      -Generate OTP
      -Send the OTP to email using nodemailer
+     -Hash patient password using bcrypt
      -Save the datails in temp patient model
+
 
 - _Insert description or controller details here._
 
