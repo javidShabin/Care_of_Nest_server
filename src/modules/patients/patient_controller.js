@@ -1,7 +1,8 @@
 import transporter from "../../configs/nodemailer.js";
+import { createError } from "../../utils/createError.js";
 import Patient from "./patient_model.js";
 import TempPatient from "./temp_patient_model.js";
-import bcrypt from "bcrypt"
+import bcrypt from "bcrypt";
 
 // Register a new patient
 export const registerPatient = async (req, res, next) => {
@@ -28,27 +29,25 @@ export const registerPatient = async (req, res, next) => {
       !gender ||
       !familyContact
     ) {
-      return res.status(400).json({ message: "All fields are required" });
+      return next(createError(400, "All fields are required"));
     }
     // Check the family contact details is present
     const { relativeName, relativePhone, relation } = familyContact;
     if (!relativeName || !relativePhone || !relation) {
-      return res
-        .status(400)
-        .json({ message: "Family contact details are required" });
+      return next(createError(400, "Family contact details are required"));
     }
     // check password and conform password are same
     if (password !== confirmPassword) {
-      return res.status(422).json({ message: "Passwords do not match" });
+      return next(createError(422, "Passwords do not match"));
     }
     // Check if the user already exists
     const existingUser = await Patient.findOne({ email });
     if (existingUser) {
-      return res.status(409).json({ message: "User already exists" });
+      return next(createError(409, "User already exists"));
     }
     // Generate 6 degit OTP for user email conformation
     const otp = Math.floor(100000 + Math.random() * 900000);
-     // setUp email message details
+    // setUp email message details
     const mailOptions = {
       from: process.env.EMAIL, // From email
       to: email, // To email from user
