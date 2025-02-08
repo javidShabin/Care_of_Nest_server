@@ -89,7 +89,17 @@ export const registerPatient = async (req, res, next) => {
 };
 
 // Verify OTP and create patient account
-export const verifyOtpAndCreatePatient = async (req, res, next) => {};
+export const verifyOtpAndCreatePatient = async (req, res, next) => {
+   // Destructer the emial and otp from request body
+  const { email, otp } = req.body;
+  try {
+    if (!email || !otp) {
+      return next(createError(400, "Email and OTP are required"));
+    }
+  } catch (error) {
+    
+  }
+};
 
 // Log in a patient
 export const loginPatient = async (req, res, next) => {};

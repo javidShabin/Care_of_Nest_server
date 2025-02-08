@@ -27,9 +27,9 @@ server.use(cookieParser()); // Cookie parser
 // Mount the routes defined in app.js
 server.use("/app", app);
 
-server.use("/", (req, res) => {
-  res.json({ message: "Hello world" });
-});
+// server.use("/", (req, res) => {
+//   res.json({ message: "Hello world" });
+// });
 
 
 
