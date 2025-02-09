@@ -142,12 +142,50 @@ export const verifyOtpAndCreatePatient = async (req, res, next) => {
       message: "User created successfully",
     });
   } catch (error) {
-    next(error)
+    next(error);
   }
 };
 
 // Log in a patient
-export const loginPatient = async (req, res, next) => {};
+export const loginPatient = async (req, res, next) => {
+  // Destructer email and password
+  const { email, password } = req.body;
+  try {
+    // Check if the required fields are present
+    if (!email || !password) {
+      return next(createError(400, "All fields are required"));
+    }
+    // Check if the user exists
+    const existingPatient = await Patient.findOne({ email });
+    if (!existingPatient) {
+      return next(createError(401, "Patient does not exist"));
+    }
+    // Compare password if the password is correct
+    const isPasswordCorrect = await bcrypt.compareSync(
+      password,
+      existingPatient.password
+    );
+    if (!isPasswordCorrect) {
+      return next(createError(401, "Invalid credentials"));
+    }
+    // Generate a token for the patient
+    const token = generateUserToken({
+      _id: existingPatient._id,
+      email: existingPatient.email,
+      role: "patient",
+    });
+
+    res.cookie("patientToken", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 5 * 60 * 60 * 1000, // 5 hours
+    });
+    return res.status(200).json({ message: "User logged in successfully" });
+  } catch (error) {
+    next(error);
+  }
+};
 
 // Get all registered patients
 export const fetchAllPatients = async (req, res, next) => {};
