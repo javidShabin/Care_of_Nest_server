@@ -188,7 +188,21 @@ export const loginPatient = async (req, res, next) => {
 };
 
 // Get all registered patients
-export const fetchAllPatients = async (req, res, next) => {};
+export const fetchAllPatients = async (req, res, next) => {
+  try {
+    // Get all patients from the database
+    const patients = await Patient.find({}).select("-password");
+    // Check if there are any patients
+    if (patients.length === 0) {
+      return next(createError(404, "No patients found"));
+    }
+    // Return the patients
+    return res.status(200).json({ patients });
+  } catch (error) {
+    console.error("Error getting patients:", error);
+    return next(error);
+  }
+};
 
 // Get a single patient's profile
 export const fetchPatientProfile = async (req, res, next) => {};
