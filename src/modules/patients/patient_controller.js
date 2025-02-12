@@ -205,7 +205,23 @@ export const fetchAllPatients = async (req, res, next) => {
 };
 
 // Get a single patient's profile
-export const fetchPatientProfile = async (req, res, next) => {};
+export const fetchPatientProfile = async (req, res, next) => {
+  try {
+    // Get the patient Id from the request parameters
+    const { _id } = req.params;
+    // Find the patient by Id from the database
+    const patient = await Patient.findById(_id).select("-password");
+    // Check if the patient exists
+    if (!patient) {
+      return next(createError(404, "Patient not found"));
+    }
+    // Return the patient profile
+    return res.status(200).json({ patient });
+  } catch (error) {
+    console.error("Error getting patient profile:", error);
+    return next(createError(500, "Internal server error"));
+  }
+};
 
 // Update a patient's profile
 export const updatePatientProfile = async (req, res, next) => {};
