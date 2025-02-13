@@ -1,3 +1,4 @@
+import cloudinaryInstance from "../../configs/cloudinary.js";
 import transporter from "../../configs/nodemailer.js";
 import { createError } from "../../utils/createError.js";
 import { generateUserToken } from "../../utils/token.js";
@@ -225,7 +226,64 @@ export const fetchPatientProfile = async (req, res, next) => {
 
 // Update a patient's profile
 export const updatePatientProfile = async (req, res, next) => {
-  
+ try {
+    // Get the patient ID from the authenticated user
+    const id = req.user?.id;
+    if (!id) {
+      return res.status(401).json({ success: false, message: "Unauthorized access" });
+    }
+
+    // Extract update fields from request body
+    const { fullName, email, phone, age, gender, address } = req.body;
+
+    // Prepare the update data
+    const updatedData = {
+      fullName,
+      email,
+      phone,
+      age,
+      gender,
+      address,
+    };
+
+    // If file is provided, upload it to Cloudinary
+    if (req.file) {
+      try {
+        const uploadResult = await cloudinaryInstance.uploader.upload(req.file.path);
+        updatedData.profilePicture = uploadResult.secure_url;
+      } catch (uploadError) {
+        return res.status(500).json({
+          success: false,
+          message: "File upload failed",
+          error: uploadError.message,
+        });
+      }
+    }
+
+    // Update patient data in the database
+    const updatedPatient = await Patient.findByIdAndUpdate(id, updatedData, {
+      new: true,
+    });
+
+    // Handle case when patient is not found
+    if (!updatedPatient) {
+      return res.status(404).json({ success: false, message: "Patient not found" });
+    }
+
+    // Respond with updated data
+    res.json({
+      success: true,
+      message: "Your profile updated successfully",
+      data: updatedPatient,
+    });
+  } catch (error) {
+    console.error("Error updating patient profile:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
 };
 
 // Send OTP for password reset
