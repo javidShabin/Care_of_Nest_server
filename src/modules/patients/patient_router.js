@@ -4,6 +4,7 @@ import {
   fetchPatientProfile,
   loginPatient,
   registerPatient,
+  sendForgotPasswordOtp,
   updatePatientProfile,
   verifyOtpAndCreatePatient,
 } from "./patient_controller.js";
@@ -24,5 +25,6 @@ patientRouter.put(
   upload.single("profilePicture"),
   updatePatientProfile
 );
+patientRouter.post("/forgot_password_otp", sendForgotPasswordOtp)
 
 export default patientRouter;

@@ -226,11 +226,13 @@ export const fetchPatientProfile = async (req, res, next) => {
 
 // Update a patient's profile
 export const updatePatientProfile = async (req, res, next) => {
- try {
+  try {
     // Get the patient ID from the authenticated user
     const id = req.user?.id;
     if (!id) {
-      return res.status(401).json({ success: false, message: "Unauthorized access" });
+      return res
+        .status(401)
+        .json({ success: false, message: "Unauthorized access" });
     }
 
     // Extract update fields from request body
@@ -249,7 +251,9 @@ export const updatePatientProfile = async (req, res, next) => {
     // If file is provided, upload it to Cloudinary
     if (req.file) {
       try {
-        const uploadResult = await cloudinaryInstance.uploader.upload(req.file.path);
+        const uploadResult = await cloudinaryInstance.uploader.upload(
+          req.file.path
+        );
         updatedData.profilePicture = uploadResult.secure_url;
       } catch (uploadError) {
         return res.status(500).json({
@@ -267,7 +271,9 @@ export const updatePatientProfile = async (req, res, next) => {
 
     // Handle case when patient is not found
     if (!updatedPatient) {
-      return res.status(404).json({ success: false, message: "Patient not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Patient not found" });
     }
 
     // Respond with updated data
@@ -278,13 +284,60 @@ export const updatePatientProfile = async (req, res, next) => {
     });
   } catch (error) {
     console.error("Error updating patient profile:", error);
-    
-    next(error)
+
+    next(error);
   }
 };
 
 // Send OTP for password reset
-export const sendForgotPasswordOtp = async (req, res, next) => {};
+export const sendForgotPasswordOtp = async (req, res, next) => {
+  // Destructer email from request body
+  const { email } = req.body;
+  try {
+    // Check if email is provided
+    if (!email) {
+      return next(createError(400, "Email is required"));
+    }
+
+    // Find the patient using the email
+    const isPatient = await Patient.findOne({ email });
+    if (!isPatient) {
+      return next(createError(404, "Patient not found"));
+    }
+
+    // Generate 6-digit OTP for password reset
+    const otp = Math.floor(100000 + Math.random() * 900000);
+
+    // Set up email message details
+    const mailOptions = {
+      from: process.env.EMAIL, // From email
+      to: email, // To email (user's email)
+      subject: "Your OTP for Password Reset",
+      text: `Your OTP is ${otp}. It expires in 10 minutes.`,
+    };
+
+    // Send the OTP to the user's email
+    await transporter.sendMail(mailOptions);
+
+    // Save or update OTP data in TempPatient collection
+    await TempPatient.findOneAndUpdate(
+      { email },
+      {
+        otp,
+        otpExpiresAt: Date.now() + 10 * 60 * 1000, // OTP expires in 10 minutes
+      },
+      { upsert: true, new: true }
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "OTP sent to your email. Please use it within 10 minutes.",
+    });
+  } catch (error) {
+    console.error("Error sending OTP:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
 
 // Verify password reset OTP
 export const verifyForgotPasswordOtp = async (req, res, next) => {};
