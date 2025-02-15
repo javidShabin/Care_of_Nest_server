@@ -340,7 +340,36 @@ export const sendForgotPasswordOtp = async (req, res, next) => {
 };
 
 // Verify password reset OTP
-export const verifyForgotPasswordOtp = async (req, res, next) => {};
+export const verifyForgotPasswordOtp = async (req, res, next) => {
+  // Destructer the emial and otp from request body
+  const { email, otp } = req.body;
+  try {
+    // Check the email and otp is present
+    if (!email || !otp) {
+      return next(createError(404, "Email and OTP are required"));
+    }
+    // Find the temp user using email, and check the user is present
+    const tempUser = await TempPatient.findOne({ email });
+    if (!tempUser) {
+      return next(createError(404, "Patient not found"));
+    }
+    // Campare the OTP
+    if (tempUser.otp !== otp) {
+      return next(createError(400, "Invalid OTP"));
+    }
+    // Check the OTP is expired or not (10 minutes)
+    if (Date.now() > tempUser.otpExpiresAt) {
+      return next(createError(400, "OTP has expired"));
+    }
+    // OTP is valid
+    return res.status(200).json({
+      message: "OTP verified successfully. You can now change your password.",
+    });
+  } catch (error) {
+    console.error("Error verifying OTP:", error);
+    next(error)
+  }
+};
 
 // Update patient's password after OTP verification
 export const updatePatientPassword = async (req, res, next) => {};

@@ -6,6 +6,7 @@ import {
   registerPatient,
   sendForgotPasswordOtp,
   updatePatientProfile,
+  verifyForgotPasswordOtp,
   verifyOtpAndCreatePatient,
 } from "./patient_controller.js";
 import { patientAuth } from "../../middlewares/patient_auth.js";
@@ -26,5 +27,6 @@ patientRouter.put(
   updatePatientProfile
 );
 patientRouter.post("/forgot_password_otp", sendForgotPasswordOtp)
+patientRouter.post("/verify_password_otp", verifyForgotPasswordOtp)
 
 export default patientRouter;
