@@ -4,6 +4,7 @@ import { createError } from "../../utils/createError.js";
 import { generateAdminToken } from "../../utils/token.js";
 import Admin from "./admin_model.js";
 import TempAdmin from "./temp_admin_model.js";
+import bcrypt from "bcrypt"
 
 // Register new admin
 export const registerAdmin = async (req, res, next) => {
@@ -23,6 +24,18 @@ export const registerAdmin = async (req, res, next) => {
     if (existAdmin) {
       return next(createError(409, "Admin already exists"));
     }
+    // Generate 6 degit OTP for admin email conformation and security
+    const otp = Math.floor(100000 + Math.random() * 900000);
+    // setUp email message details
+    const mailOptions = {
+      from: process.env.EMAIL, // From email
+      to: email, // To email from user
+      subject: "Your OTP for Registration",
+      text: `Your OTP is ${otp}. Please verify to complete your registration.`,
+    };
+    // Send the mail with creating mail details
+    await transporter.sendMail(mailOptions);
+
   } catch (error) {}
 };
 // Verify OTP and create a new admin account
