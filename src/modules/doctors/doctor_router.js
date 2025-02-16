@@ -8,6 +8,7 @@ import {
   getLoggedInDoctorProfile,
   loginDoctor,
   registerDoctor,
+  updateDoctorProfile,
   verifyDoctorOtpAndCreateAccount,
 } from "./doctor_controller.js";
 
@@ -20,5 +21,6 @@ doctorRouter.get("/get_doctors_list", fetchAllDoctors)
 doctorRouter.get("/verifyed_doctors_list", fetchAdminVerifiedDoctors)
 doctorRouter.get("/doctor_profile/:_id", getDoctorProfileById)
 doctorRouter.get("/doctor_loged_profile", doctorAuth, getLoggedInDoctorProfile)
+doctorRouter.put("/update_doctor_profile", doctorAuth, upload.single("profilePicture"), updateDoctorProfile)
 
 export default doctorRouter;
