@@ -4,7 +4,6 @@ import { createError } from "../../utils/createError.js";
 import { generateUserToken } from "../../utils/token.js";
 import Patient from "./patient_model.js";
 import TempPatient from "./temp_patient_model.js";
-import bcrypt from "bcrypt";
 
 // Register a new patient
 export const registerPatient = async (req, res, next) => {
