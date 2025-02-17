@@ -367,12 +367,46 @@ export const verifyForgotPasswordOtp = async (req, res, next) => {
     });
   } catch (error) {
     console.error("Error verifying OTP:", error);
-    next(error)
+    next(error);
   }
 };
 
 // Update patient's password after OTP verification
-export const updatePatientPassword = async (req, res, next) => {};
+export const updatePatientPassword = async (req, res, next) => {
+  // Destructer the email, password and verify password
+  const { email, password, confirmPassword } = req.body;
+  try {
+    // Check required fields are present or not
+    if (!email || !password || !confirmPassword) {
+      return next(createError(400, "All fields are required"));
+    }
+    // Compare password and confom password
+    if (password !== confirmPassword) {
+      return next(createError(400, "Passwords do not match"));
+    }
+    // Find tempuser using email
+    const isTempUser = TempPatient.findOne({ email });
+    if (!isTempUser) {
+      return next(createError(404, "Patient not found"));
+    }
+    // Hash the user password using bcrypt
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Update the patient password
+    const patient = await Patient.findOneAndUpdate(
+      { email },
+      { password: hashedPassword },
+      { new: true }
+    );
+
+    // clear the tempPatient
+    await TempPatient.deleteOne({ email });
+    return res.status(200).json({ message: "Password changed successfully" });
+  } catch (error) {
+    console.error("Error changing password:", error);
+    next(error)
+  }
+};
 
 // Log out a patient and clear session cookie
 export const logoutPatient = async (req, res, next) => {};
