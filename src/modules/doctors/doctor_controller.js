@@ -375,17 +375,7 @@ export const sendPasswordResetOtp = async (req, res, next) => {
     }
     // Generate 6-digit OTP for password reset
     const otp = Math.floor(100000 + Math.random() * 900000);
-    // Create transporter object using node mailer
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL,
-        pass: process.env.EMAIL_PASSWORD,
-      },
-      tls: {
-        rejectUnauthorized: false, // Accept self-signed certificates
-      },
-    });
+    
     // Set up email message details
     const mailOptions = {
       from: process.env.EMAIL, // From email
