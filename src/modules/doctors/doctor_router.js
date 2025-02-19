@@ -11,6 +11,7 @@ import {
   sendPasswordResetOtp,
   updateDoctorProfile,
   verifyDoctorOtpAndCreateAccount,
+  verifyOtpAndResetPassword,
 } from "./doctor_controller.js";
 
 const doctorRouter = express.Router();
@@ -29,5 +30,6 @@ doctorRouter.put(
   updateDoctorProfile
 );
 doctorRouter.post("/forgot_password_otp", sendPasswordResetOtp)
+doctorRouter.post("/verify_password_otp", verifyOtpAndResetPassword)
 
 export default doctorRouter;
