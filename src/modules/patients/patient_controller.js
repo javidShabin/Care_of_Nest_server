@@ -404,9 +404,22 @@ export const updatePatientPassword = async (req, res, next) => {
     return res.status(200).json({ message: "Password changed successfully" });
   } catch (error) {
     console.error("Error changing password:", error);
-    next(error)
+    next(error);
   }
 };
 
 // Log out a patient and clear session cookie
-export const logoutPatient = async (req, res, next) => {};
+export const logoutPatient = async (req, res, next) => {
+  try {
+    // Clear the token from cookie
+    res.clearCookie("patientToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
+    return res.status(200).json({ message: "User logged out successfully" });
+  } catch (error) {
+    console.error("Error logging out user:", error);
+    next(error);
+  }
+};
