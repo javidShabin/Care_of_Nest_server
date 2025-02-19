@@ -9,6 +9,7 @@ import {
   loginDoctor,
   registerDoctor,
   sendPasswordResetOtp,
+  updateDoctorPassword,
   updateDoctorProfile,
   verifyDoctorOtpAndCreateAccount,
   verifyOtpAndResetPassword,
@@ -31,5 +32,6 @@ doctorRouter.put(
 );
 doctorRouter.post("/forgot_password_otp", sendPasswordResetOtp)
 doctorRouter.post("/verify_password_otp", verifyOtpAndResetPassword)
+doctorRouter.patch("/update_password", updateDoctorPassword)
 
 export default doctorRouter;
