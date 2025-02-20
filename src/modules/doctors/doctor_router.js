@@ -7,6 +7,7 @@ import {
   getDoctorProfileById,
   getLoggedInDoctorProfile,
   loginDoctor,
+  logoutDoctor,
   registerDoctor,
   sendPasswordResetOtp,
   updateDoctorPassword,
@@ -33,5 +34,6 @@ doctorRouter.put(
 doctorRouter.post("/forgot_password_otp", sendPasswordResetOtp)
 doctorRouter.post("/verify_password_otp", verifyOtpAndResetPassword)
 doctorRouter.patch("/update_password", updateDoctorPassword)
+doctorRouter.delete("/logout_doctor", doctorAuth, logoutDoctor)
 
 export default doctorRouter;
