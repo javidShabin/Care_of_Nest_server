@@ -3,8 +3,10 @@ import {
   fetchAllPatients,
   fetchPatientProfile,
   loginPatient,
+  logoutPatient,
   registerPatient,
   sendForgotPasswordOtp,
+  updatePatientPassword,
   updatePatientProfile,
   verifyForgotPasswordOtp,
   verifyOtpAndCreatePatient,
@@ -26,7 +28,9 @@ patientRouter.put(
   upload.single("profilePicture"),
   updatePatientProfile
 );
-patientRouter.post("/forgot_password_otp", sendForgotPasswordOtp)
-patientRouter.post("/verify_password_otp", verifyForgotPasswordOtp)
+patientRouter.post("/forgot_password_otp", sendForgotPasswordOtp);
+patientRouter.post("/verify_password_otp", verifyForgotPasswordOtp);
+patientRouter.patch("/change-password", updatePatientPassword);
+patientRouter.delete("/patient-logout", logoutPatient);
 
 export default patientRouter;
