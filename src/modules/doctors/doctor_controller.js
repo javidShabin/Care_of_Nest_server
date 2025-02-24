@@ -171,8 +171,7 @@ export const verifyDoctorOtpAndCreateAccount = async (req, res, next) => {
     });
     // Return a success response
     res.status(201).json({
-      msg: "Doctor registered successfully",
-      doctor: newDoctor,
+      msg: "Doctor registered successfully"
     });
   } catch (error) {
     console.error(error);
