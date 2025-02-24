@@ -17,7 +17,7 @@ import { upload } from "../../middlewares/multer.js";
 const patientRouter = express.Router();
 
 // Register a new patient
-patientRouter.post("/register", registerPatient);
+patientRouter.post("/register_patient", registerPatient);
 patientRouter.post("/verify_otp", verifyOtpAndCreatePatient);
 patientRouter.post("/login_patient", loginPatient);
 patientRouter.get("/patients_list", fetchAllPatients);
