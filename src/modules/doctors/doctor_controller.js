@@ -444,7 +444,52 @@ export const verifyOtpAndResetPassword = async (req, res, next) => {
 };
 
 // Update doctor's password (while logged in)
-export const updateDoctorPassword = async (req, res, next) => {};
+export const updateDoctorPassword = async (req, res, next) => {
+  // Desructer the email , password, confirmPassword
+  const { email, password, confirmPassword } = req.body;
+  try {
+    // Check the required fields are present or not
+    if (!email || !password || !confirmPassword) {
+      return next(createError(400, "All fields are required"));
+    }
+    // Compare password and conform password
+    if (password !== confirmPassword) {
+      return next(createError(400, "Passwords do not match"));
+    }
+    // Find tempDoctor using email
+    const isTempDoctor = await TempDoctor.findOne({ email });
+    if (!isTempDoctor) {
+      return next(createError(404, "Doctor not found"));
+    }
+    // Hash the doctor password using bcrypt
+    const hashedPassword = await bcrypt.hash(password, 10);
+    // Update the doctor password find using email
+    const docter = await Doctor.findOneAndUpdate(
+      { email },
+      { password: hashedPassword },
+      { new: true }
+    );
+    // Clear the tempDoctor
+    await TempDoctor.deleteOne({ email });
+    return res.status(200).json({ message: "Password changed successfully" });
+  } catch (error) {
+    console.error("Error changing password:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
 
 // Logout doctor and clear session
-export const logoutDoctor = async (req, res, next) => {};
+export const logoutDoctor = async (req, res, next) => {
+    try {
+    // Clear the token from cookie
+    res.clearCookie("doctorToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
+    return res.status(200).json({ message: "Doctor logged out successfully" });
+  } catch (error) {
+    console.error("Error logging out user:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
