@@ -225,7 +225,21 @@ export const loginDoctor = async (req, res, next) => {
 };
 
 // Get list of all doctors
-export const fetchAllDoctors = async (req, res, next) => {};
+export const fetchAllDoctors = async (req, res, next) => {
+  try {
+    // Get all patient from the database, avoid password
+    const doctors = await Doctor.find({}).select("-password");
+    // Check if there are only doctor
+    if (doctors.length === 0) {
+      return next(createError(404, "No doctors found found"));
+    }
+    // Return the patients
+    return res.status(200).json({ success: true, data: doctors });
+  } catch (error) {
+    console.error("Error getting doctors:", error);
+    next(error);
+  }
+};
 
 // Get all doctors verified by admin
 export const fetchAdminVerifiedDoctors = async (req, res, next) => {};
