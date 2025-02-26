@@ -361,10 +361,87 @@ export const updateDoctorProfile = async (req, res, next) => {
 };
 
 // Send OTP for password reset
-export const sendPasswordResetOtp = async (req, res, next) => {};
+export const sendPasswordResetOtp = async (req, res, next) => {
+  // Destructer email from request body
+  const { email } = req.body;
+  try {
+    // Check if email is provided
+    if (!email) {
+      return next(createError(400, "Email is required"));
+    }
+    // Find the doctor using the email
+    const isDoctor = await Doctor.findOne({ email });
+    if (!isDoctor) {
+      return next(createError(404, "Doctor not found"));
+    }
+    // Generate 6-digit OTP for password reset
+    const otp = Math.floor(100000 + Math.random() * 900000);
+    // Create transporter object using node mailer
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL,
+        pass: process.env.EMAIL_PASSWORD,
+      },
+      tls: {
+        rejectUnauthorized: false, // Accept self-signed certificates
+      },
+    });
+    // Set up email message details
+    const mailOptions = {
+      from: process.env.EMAIL, // From email
+      to: email, // To email (doctor's email)
+      subject: "Your OTP for Password Reset",
+      text: `Your OTP is ${otp}. It expires in 10 minutes.`,
+    };
+    // Send the OTP to the doctors email
+    await transporter.sendMail(mailOptions);
+    // Save or update OTP data in TempDoctor collection
+    await TempDoctor.findOneAndUpdate(
+      { email },
+      {
+        otp,
+        otpExpiresAt: Date.now() + 10 * 60 * 1000, // OTP expires in 10 minutes
+      },
+      { upsert: true, new: true }
+    );
+    return res.status(200).json({
+      success: true,
+      message: "OTP sent to your email. Please use it within 10 minutes.",
+    });
+  } catch (error) {
+    console.error("Error sending OTP:", error);
+    next(error);
+  }
+};
 
 // Verify OTP and reset password
-export const verifyOtpAndResetPassword = async (req, res, next) => {};
+export const verifyOtpAndResetPassword = async (req, res, next) => {
+  // Destructer the email and otp from request body
+  const { email, otp } = req.body;
+  try {
+    // Check the email and otp from request body
+    if (!email || !otp) {
+      return next(createError(400, "Email and OTP are required"));
+    }
+    // Find the temp doctor using email, and check the doctor is present
+    const tempDoctor = await TempDoctor.findOne({ email });
+    if (!tempDoctor) {
+      return next(createError(404, "Doctor not found"));
+    }
+    // Compare the OTP is expired or not (10 minutes)
+    if (Date.now() > tempDoctor.otpExpiresAt) {
+      return next(createError(404, "OTP has expired"));
+    }
+    // OTP is valid
+    return res.status(200).json({
+      message: "OTP verified successfully. You can now change your password.",
+    });
+  } catch (error) {
+    console.error("Error verifying OTP:", error);
+    next(error);
+  }
+};
 
 // Update doctor's password (while logged in)
 export const updateDoctorPassword = async (req, res, next) => {};
