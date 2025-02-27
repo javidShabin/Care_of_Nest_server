@@ -223,7 +223,7 @@ export const loginDoctor = async (req, res, next) => {
   }
 };
 
-// Get list of all doctors
+// Get list of all doctors for admin
 export const fetchAllDoctors = async (req, res, next) => {
   try {
     // Get all patient from the database, avoid password
