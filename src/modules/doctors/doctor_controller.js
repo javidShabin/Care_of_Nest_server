@@ -288,7 +288,77 @@ export const getLoggedInDoctorProfile = async (req, res, next) => {
 };
 
 // Update logged-in doctor's profile
-export const updateDoctorProfile = async (req, res, next) => {};
+export const updateDoctorProfile = async (req, res, next) => {
+  const { id } = req.doctor;
+
+  try {
+    // Destructure the doctor profile fields from the request body
+    const {
+      fullName,
+      email,
+      phone,
+      gender,
+      specialization,
+      qualifications,
+      experience,
+      profilePicture,
+      availability,
+      consultationFee,
+      socialLinks,
+      timeSlots,
+    } = req.body;
+
+    // Store updated data in a variable
+    const updatedData = {
+      fullName,
+      email,
+      phone,
+      gender,
+      specialization,
+      qualifications,
+      experience,
+      profilePicture,
+      availability,
+      consultationFee,
+      socialLinks,
+      timeSlots,
+    };
+
+    // Handle profile picture upload if a file is provided
+    if (req.file) {
+      try {
+        const uploadResult = await cloudinaryInstance.uploader.upload(
+          req.file.path
+        );
+        updatedData.profilePicture = uploadResult.secure_url;
+      } catch (error) {
+        return next({
+          status: 500,
+          message: "Profile picture upload failed",
+          error: error.message,
+        });
+      }
+    }
+
+    // Update doctor profile
+    const updatedDoctor = await Doctor.findByIdAndUpdate(id, updatedData, {
+      new: true,
+    });
+
+    if (!updatedDoctor) {
+      return next(createError(404, "Doctor not found"));
+    }
+
+    // Success response
+    res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      data: updatedDoctor,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 // Send OTP for password reset
 export const sendPasswordResetOtp = async (req, res, next) => {};
