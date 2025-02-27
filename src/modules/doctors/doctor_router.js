@@ -4,6 +4,7 @@ import { upload } from "../../middlewares/multer.js";
 import {
     fetchAdminVerifiedDoctors,
     fetchAllDoctors,
+  getDoctorProfileById,
   loginDoctor,
   registerDoctor,
   verifyDoctorOtpAndCreateAccount,
@@ -16,5 +17,6 @@ doctorRouter.post("/verify_otp", verifyDoctorOtpAndCreateAccount);
 doctorRouter.post("/login_doctor", loginDoctor);
 doctorRouter.get("/get_doctors_list", fetchAllDoctors)
 doctorRouter.get("/verifyed_doctors_list", fetchAdminVerifiedDoctors)
+doctorRouter.get("/doctor_profile/:_id", getDoctorProfileById)
 
 export default doctorRouter;
