@@ -184,7 +184,45 @@ export const verifyDoctorOtpAndCreateAccount = async (req, res, next) => {
 };
 
 // Login doctor
-export const loginDoctor = async (req, res, next) => {};
+export const loginDoctor = async (req, res, next) => {
+  // Destrcter email and password from request body
+  const { email, password } = req.body;
+  try {
+    // Check the email and password is present or not
+    if (!email || !password) {
+      return next(createError(400, "Email and password are required"));
+    }
+    // Check if the user exists
+    const existingDoctor = await Doctor.findOne({ email });
+    if (!existingDoctor) {
+      return next(createError(400, "Doctor does not exist"));
+    }
+    // Check the password is corrent
+    const isPasswordCorrect = await bcrypt.compareSync(
+      password,
+      existingDoctor.password
+    );
+    if (!isPasswordCorrect) {
+      return next(createError(404, "Invalid credentials"));
+    }
+    // Generate a token for the doctor
+    const token = generateDoctorToken({
+      _id: existingDoctor._id,
+      email: existingDoctor.email,
+      role: "doctor",
+    });
+    res.cookie("doctorToken", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 5 * 60 * 60 * 1000, // 5 hours
+    });
+    return res.status(200).json({ message: "Doctor logged in successfully" });
+  } catch (error) {
+    console.error("Error logging in user:", error);
+    next(error);
+  }
+};
 
 // Get list of all doctors
 export const fetchAllDoctors = async (req, res, next) => {};
