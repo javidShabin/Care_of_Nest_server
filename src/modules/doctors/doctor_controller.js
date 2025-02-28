@@ -242,7 +242,16 @@ export const fetchAllDoctors = async (req, res, next) => {
 };
 
 // Get all doctors verified by admin
-export const fetchAdminVerifiedDoctors = async (req, res, next) => {};
+export const fetchAdminVerifiedDoctors = async (req, res, next) => {
+  try {
+    // Find the Admin verifyed doctors
+    const doctors = await Doctor.find({ isVerified: true });
+    // Send the verifyed doctors list to client
+    res.status(200).json(doctors);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+};
 
 // Get doctor profile (for user view) by ID
 export const getDoctorProfileById = async (req, res, next) => {};
