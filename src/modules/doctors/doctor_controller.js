@@ -254,10 +254,38 @@ export const fetchAdminVerifiedDoctors = async (req, res, next) => {
 };
 
 // Get doctor profile (for user view) by ID
-export const getDoctorProfileById = async (req, res, next) => {};
+export const getDoctorProfileById = async (req, res, next) => {
+  // Get docto id from req.params
+  const { _id } = req.params;
+  try {
+    // Find the doctor by id
+    const doctor = await Doctor.findById(_id).select("-password");
+    if (!doctor) {
+      return next(createError(404, "Doctor not found"));
+    }
+    // Return the doctor profile
+    return res.status(200).json({ doctor });
+  } catch (error) {
+    console.error("Error getting doctor profile:", error);
+    next(error);
+  }
+};
 
 // Get logged-in doctor's own profile
-export const getLoggedInDoctorProfile = async (req, res, next) => {};
+export const getLoggedInDoctorProfile = async (req, res, next) => {
+  const { id } = req.doctor;
+  try {
+    const doctorProfile = await Doctor.findById(id);
+    if (!doctorProfile) {
+      return next(createError(404, "Doctor not found"));
+    }
+    // Return the doctor profile
+    return res.status(200).json({ doctorProfile });
+  } catch (error) {
+    console.error("Error getting geting profile:", error);
+    next(error);
+  }
+};
 
 // Update logged-in doctor's profile
 export const updateDoctorProfile = async (req, res, next) => {};
