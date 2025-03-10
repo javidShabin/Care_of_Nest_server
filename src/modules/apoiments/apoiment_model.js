@@ -17,7 +17,7 @@ const appointmentSchema = new mongoose.Schema({
     required: true,
   },
   timeSlot: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
     required: true,
   },
   reason: {

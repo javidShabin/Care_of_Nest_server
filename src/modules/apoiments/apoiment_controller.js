@@ -17,6 +17,33 @@ export const getDoctorAvailability = async (req, res, next) => {
       availability: doctor.availability,
     });
   } catch (error) {
+    next(error);
     res.status(500).json({ message: "Server error" });
   }
+};
+
+export const bookApoiment = async (req, res, next) => {
+  const { doctorId, date, timeSlot, reason } = req.body;
+  const patientId = req.patient.id;
+
+  try {
+    if (!doctorId || !date || !timeSlot || !reason) {
+      return next(createError(404, "All fields are required"));
+    }
+    const doctor = await Doctor.findById(doctorId);
+    if (!doctor) return res.status(404).json({ message: "Doctor not found" });
+
+    const isSlotValid = doctor.availability.some((day) =>
+      day.timeSlots.some((slot) => slot._id.toString() === timeSlot)
+    );
+
+    if (!isSlotValid) {
+      return next(createError(400, "Invalid time slot"));
+    }
+
+    // const arr = doctor.availability.map(
+    //   (slots) => slots._id.toString() === timeSlot
+    // );
+    // console.log(arr, "=====booked slotes");
+  } catch (error) {}
 };
