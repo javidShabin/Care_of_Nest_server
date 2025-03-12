@@ -27,6 +27,7 @@ export const registerPatient = async (req, res, next) => {
       !email ||
       !phone ||
       !password ||
+      !confirmPassword||
       !age ||
       !gender ||
       !familyContact
