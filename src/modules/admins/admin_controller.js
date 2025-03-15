@@ -38,6 +38,23 @@ export const registerAdmin = async (req, res, next) => {
     // Hash the patient passowrd
     const salt = 10;
     const hashedPassword = await bcrypt.hash(password, salt);
+    // Save or update temporary admin data with OTP and expire date
+    await TempAdmin.findOneAndUpdate(
+      { email },
+      {
+        fullName,
+        email,
+        password: hashedPassword,
+        otp,
+        otpExpiresAt: Date.now() + 10 * 60 * 1000, // OTP expires in 10 minutes
+        phone,
+      },
+      { upsert: true, new: true }
+    );
+    return res.status(200).json({
+      success: true,
+      message: "OTP sent to your email. Please verify within 10 minutes.",
+    });
   } catch (error) {}
 };
 // Verify OTP and create a new admin account
