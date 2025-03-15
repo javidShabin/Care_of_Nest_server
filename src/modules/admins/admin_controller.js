@@ -4,7 +4,7 @@ import { createError } from "../../utils/createError.js";
 import { generateAdminToken } from "../../utils/token.js";
 import Admin from "./admin_model.js";
 import TempAdmin from "./temp_admin_model.js";
-import bcrypt from "bcrypt"
+import bcrypt from "bcrypt";
 
 // Register new admin
 export const registerAdmin = async (req, res, next) => {
@@ -35,7 +35,9 @@ export const registerAdmin = async (req, res, next) => {
     };
     // Send the mail with creating mail details
     await transporter.sendMail(mailOptions);
-
+    // Hash the patient passowrd
+    const salt = 10;
+    const hashedPassword = await bcrypt.hash(password, salt);
   } catch (error) {}
 };
 // Verify OTP and create a new admin account
