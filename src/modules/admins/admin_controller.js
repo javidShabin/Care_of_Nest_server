@@ -58,7 +58,55 @@ export const registerAdmin = async (req, res, next) => {
   } catch (error) {}
 };
 // Verify OTP and create a new admin account
-export const verifyAdminOtpAndCreateAccount = async (req, res, next) => {};
+export const verifyAdminOtpAndCreateAccount = async (req, res, next) => {
+  // Destructer the emial and otp from request body
+  const { email, otp } = req.body;
+  try {
+    if (!email || !otp) {
+      return next(createError(400, "Email and OTP are required"));
+    }
+    // Find the temporary admin by email
+    const temAdmin = await TempAdmin.findOne({ email });
+    if (!temAdmin) {
+      return next(createError(404, "Admin not found"));
+    }
+    // verify the OTP same or not
+    if (temAdmin.otp !== otp) {
+      return next(createError(400, "Invalid OTP"));
+    }
+    // Check the OTP expire or not
+    if (temAdmin.otpExpiresAt < Date.now()) {
+      return next(createError(400, "OTP has expired"));
+    }
+    // Create new admin and save the server
+    const newAdmin = new Admin({
+      fullName: temAdmin.fullName,
+      email: temAdmin.email,
+      password: temAdmin.password,
+      phone: temAdmin.phone,
+    });
+    await newAdmin.save();
+    // Generate admin token using using id, email and role
+    const token = generateAdminToken({
+      _id: newAdmin._id,
+      email: newAdmin.email,
+      role: "admin",
+    });
+    // Set the token to cookie
+    res.cookie("adminToken", token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "strict",
+    });
+    await TempAdmin.deleteOne({ email });
+    res.status(201).json({
+      success: true,
+      message: "Account created successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 // Login admin
 export const loginAdmin = async (req, res, next) => {};
 // Get logged-in admin's own profile
