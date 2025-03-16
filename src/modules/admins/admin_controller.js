@@ -97,6 +97,7 @@ export const verifyAdminOtpAndCreateAccount = async (req, res, next) => {
       httpOnly: true,
       secure: false,
       sameSite: "strict",
+      maxAge: 5 * 60 * 60 * 1000, // 5 hours
     });
     await TempAdmin.deleteOne({ email });
     res.status(201).json({
@@ -108,7 +109,45 @@ export const verifyAdminOtpAndCreateAccount = async (req, res, next) => {
   }
 };
 // Login admin
-export const loginAdmin = async (req, res, next) => {};
+export const loginAdmin = async (req, res, next) => {
+  // Destructer email and password
+  const { email, password } = req.body;
+  try {
+    // Check if the required fields are present
+    if (!email || !password) {
+      return next(createError(400, "All fields are required"));
+    }
+    // Check if the user exists
+    const existngAdmin = await Admin.findOne({ email });
+    if (!existngAdmin) {
+      return next(createError(401, "Admin does not exist"));
+    }
+    // Compare password if the password is correct
+    const isPasswordCorrect = await bcrypt.compareSync(
+      password,
+      existngAdmin.password
+    );
+    if (!isPasswordCorrect) {
+      return next(createError(401, "Invalid credentials"));
+    }
+    // Generate admin token using using id, email and role
+    const token = generateAdminToken({
+      _id: existngAdmin._id,
+      email: existngAdmin.email,
+      role: "admin",
+    });
+    // Set the token to cookie
+    res.cookie("adminToken", token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "strict",
+      maxAge: 5 * 60 * 60 * 1000, // 5 hours
+    });
+    return res.status(200).json({ message: "Logged in successfully" });
+  } catch (error) {
+    next(error);
+  }
+};
 // Get logged-in admin's own profile
 export const getLoggedInAdminProfile = async (req, res, next) => {};
 // Update logged-in admin's profile
