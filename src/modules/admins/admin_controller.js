@@ -149,7 +149,21 @@ export const loginAdmin = async (req, res, next) => {
   }
 };
 // Get logged-in admin's own profile
-export const getLoggedInAdminProfile = async (req, res, next) => {};
+export const getLoggedInAdminProfile = async (req, res, next) => {
+  // Get id from request admin (auth admin)
+  const { id } = req.admin;
+  try {
+    const adminProfile = await Admin.findById(id);
+    if (!adminProfile) {
+      return next(createError(404, "Admin not found"));
+    }
+    // Return the doctor profile
+    return res.status(200).json({ adminProfile });
+  } catch (error) {
+    onsole.error("Error getting geting profile:", error);
+    next(error);
+  }
+};
 // Update logged-in admin's profile
 export const updateAdminProfile = async (req, res, next) => {};
 // Send OTP for password reset
