@@ -258,7 +258,32 @@ export const sendPasswordResetOtp = async (req, res, next) => {
   }
 };
 // Verify OTP and reset password
-export const verifyOtpAndResetPassword = async (req, res, next) => {};
+export const verifyOtpAndResetPassword = async (req, res, next) => {
+  // Destructer the email and otp from request body
+  const { email, otp } = req.body;
+  try {
+    // Check the email and otp from request body
+    if (!email || !otp) {
+      return next(createError(400, "Email and OTP are required"));
+    }
+    // Find the temp admin using email, and check the admin is present
+    const temAdmin = await TempAdmin.findOne({ email });
+    if (!temAdmin) {
+      return next(createError(404, "Admin not found"));
+    }
+    // Compare the OTP is expired or not (10 minutes)
+    if (Date.now() > temAdmin.otpExpiresAt) {
+      return next(createError(404, "OTP has expired"));
+    }
+    // OTP is valid
+    return res.status(200).json({
+      message: "OTP verified successfully. You can now change your password.",
+    });
+  } catch (error) {
+    console.error("Error verifying OTP:", error);
+    next(error);
+  }
+};
 // Update doctor's password
 export const updateAdminPassword = async (req, res, next) => {};
 // Logout doctor and clear session
