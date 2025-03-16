@@ -48,6 +48,7 @@ export const registerAdmin = async (req, res, next) => {
         otp,
         otpExpiresAt: Date.now() + 10 * 60 * 1000, // OTP expires in 10 minutes
         phone,
+        profilePicture,
       },
       { upsert: true, new: true }
     );
@@ -84,6 +85,7 @@ export const verifyAdminOtpAndCreateAccount = async (req, res, next) => {
       email: temAdmin.email,
       password: temAdmin.password,
       phone: temAdmin.phone,
+      profilePicture: temAdmin.profilePicture,
     });
     await newAdmin.save();
     // Generate admin token using using id, email and role
@@ -165,7 +167,53 @@ export const getLoggedInAdminProfile = async (req, res, next) => {
   }
 };
 // Update logged-in admin's profile
-export const updateAdminProfile = async (req, res, next) => {};
+export const updateAdminProfile = async (req, res, next) => {
+  // Get id from request admin (auth admin)
+  const { id } = req.admin;
+  try {
+    // destructer the admin profile fields from request body
+    const { fullName, email, phone, profilePicture } = req.body;
+
+    // Store updated data in a variable
+    const updatedData = {
+      fullName,
+      email,
+      phone,
+      profilePicture,
+    };
+    // Handle profile picture upload if a file is provided
+    if (req.file) {
+      try {
+        const uploadResult = await cloudinaryInstance.uploader.upload(
+          req.file.path
+        );
+        updatedData.profilePicture = uploadResult.secure_url;
+      } catch (error) {
+        return next({
+          status: 500,
+          message: "Profile picture upload failed",
+          error: error.message,
+        });
+      }
+    }
+
+    // Update admin profile
+    const updatedAdmin = await Admin.findByIdAndUpdate(id, updatedData, {
+      new: true,
+    });
+    if (!updatedAdmin) {
+      return next(createError(404, "Admin not found"));
+    }
+    // Success response
+    res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      data: updatedAdmin,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 // Send OTP for password reset
 export const sendPasswordResetOtp = async (req, res, next) => {};
 // Verify OTP and reset password
