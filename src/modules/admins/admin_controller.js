@@ -285,6 +285,38 @@ export const verifyOtpAndResetPassword = async (req, res, next) => {
   }
 };
 // Update doctor's password
-export const updateAdminPassword = async (req, res, next) => {};
+export const updateAdminPassword = async (req, res, next) => {
+  // Desructer the email , password, confirmPassword
+  const { email, password, confirmPassword } = req.body;
+  try {
+    // Check the required fields are present or not
+    if (!email || !password || !confirmPassword) {
+      return next(createError(400, "All fields are required"));
+    }
+    // Compare password and conform password
+    if (password !== confirmPassword) {
+      return next(createError(400, "Passwords do not match"));
+    }
+    // Find tempAdmin using email
+    const temAdmin = await TempAdmin.findOne({ email });
+    if (!temAdmin) {
+      return next(createError(404, "Admin not found"));
+    }
+    // Hash the admin password using bcrypt
+    const hashedPassword = await bcrypt.hash(password, 10);
+    // Update the admin password find using email
+    const admin = await Admin.findOneAndUpdate(
+      { email },
+      { password: hashedPassword },
+      { new: true }
+    );
+    // Clear the tempAdmin
+    await TempAdmin.deleteOne({ email });
+    return res.status(200).json({ message: "Password changed successfully" });
+  } catch (error) {
+    console.error("Error changing password:", error);
+    next(error)
+  }
+};
 // Logout doctor and clear session
 export const logoutAdmin = async (req, res, next) => {};
