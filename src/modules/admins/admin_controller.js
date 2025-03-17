@@ -319,4 +319,17 @@ export const updateAdminPassword = async (req, res, next) => {
   }
 };
 // Logout doctor and clear session
-export const logoutAdmin = async (req, res, next) => {};
+export const logoutAdmin = async (req, res, next) => {
+    try {
+    // Clear the token from cookie
+    res.clearCookie("adminToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
+    return res.status(200).json({ message: "Admin logged out successfully" });
+  } catch (error) {
+    console.error("Error logging out admin:", error);
+    next(error)
+  }
+};
