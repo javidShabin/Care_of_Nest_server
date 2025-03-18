@@ -16,7 +16,7 @@ export const patientAuth = (req, res, next) => {
       return next(createError(401, "Unauthorized access"));
     }
     // If the token is valid, proceed to the next middleware or route handler
-    req.user = verifyToken;
+    req.patient = verifyToken;
     next();
   } catch (error) {
     console.error("Error in patientAuth middleware:", error);

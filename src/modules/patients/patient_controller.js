@@ -229,7 +229,7 @@ export const fetchPatientProfile = async (req, res, next) => {
 export const updatePatientProfile = async (req, res, next) => {
   try {
     // Get the patient ID from the authenticated user
-    const id = req.user?.id;
+    const id = req.patient?.id;
     if (!id) {
       return res
         .status(401)

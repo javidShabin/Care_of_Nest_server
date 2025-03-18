@@ -1,7 +1,7 @@
 import cloudinaryInstance from "../../configs/cloudinary.js";
 import transporter from "../../configs/nodemailer.js";
 import { createError } from "../../utils/createError.js";
-import { generateDoctorToken } from "../../utils/token.js";
+import { generateUserToken } from "../../utils/token.js";
 import Doctor from "./doctor_model.js";
 import TempDoctor from "./temp_doctor_model.js";
 import bcrypt from "bcrypt";
@@ -135,7 +135,7 @@ export const verifyDoctorOtpAndCreateAccount = async (req, res, next) => {
     });
     await newDoctor.save();
     // Generate doctor token using doctor id, email and role
-    const token = generateDoctorToken({
+    const token = generateUserToken({
       _id: newDoctor._id,
       email: newDoctor.email,
       role: "doctor",
@@ -205,7 +205,7 @@ export const loginDoctor = async (req, res, next) => {
       return next(createError(404, "Invalid credentials"));
     }
     // Generate a token for the doctor
-    const token = generateDoctorToken({
+    const token = generateUserToken({
       _id: existingDoctor._id,
       email: existingDoctor.email,
       role: "doctor",
