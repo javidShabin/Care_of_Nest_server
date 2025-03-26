@@ -1,7 +1,7 @@
 import cloudinaryInstance from "../../configs/cloudinary.js";
 import transporter from "../../configs/nodemailer.js";
 import { createError } from "../../utils/createError.js";
-import { generateAdminToken } from "../../utils/token.js";
+import { generateUserToken } from "../../utils/token.js";
 import Admin from "./admin_model.js";
 import TempAdmin from "./temp_admin_model.js";
 import bcrypt from "bcrypt";
@@ -89,7 +89,7 @@ export const verifyAdminOtpAndCreateAccount = async (req, res, next) => {
     });
     await newAdmin.save();
     // Generate admin token using using id, email and role
-    const token = generateAdminToken({
+    const token = generateUserToken({
       _id: newAdmin._id,
       email: newAdmin.email,
       role: "admin",
@@ -133,7 +133,7 @@ export const loginAdmin = async (req, res, next) => {
       return next(createError(401, "Invalid credentials"));
     }
     // Generate admin token using using id, email and role
-    const token = generateAdminToken({
+    const token = generateUserToken({
       _id: existngAdmin._id,
       email: existngAdmin.email,
       role: "admin",
