@@ -22,28 +22,47 @@ export const getDoctorAvailability = async (req, res, next) => {
   }
 };
 
+// Book a apoiment
 export const bookApoiment = async (req, res, next) => {
+  // Destructer the needed fields from request body
   const { doctorId, date, timeSlot, reason } = req.body;
-  const patientId = req.patient.id;
+  const patientId = req.patient.id; // Get patient id from authentication
 
   try {
+    // Check the required fields are present or not
     if (!doctorId || !date || !timeSlot || !reason) {
       return next(createError(404, "All fields are required"));
     }
+    // Find the doctor using Id
     const doctor = await Doctor.findById(doctorId);
     if (!doctor) return res.status(404).json({ message: "Doctor not found" });
 
+    // Check the given slot is available
     const isSlotValid = doctor.availability.some((day) =>
       day.timeSlots.some((slot) => slot._id.toString() === timeSlot)
     );
 
-    if (!isSlotValid) {
-      return next(createError(400, "Invalid time slot"));
-    }
-
-    // const arr = doctor.availability.map(
-    //   (slots) => slots._id.toString() === timeSlot
-    // );
-    // console.log(arr, "=====booked slotes");
-  } catch (error) {}
+    if (!isSlotValid) return next(createError(400, "Invalid time slot"));
+    // Check if slot already booked
+    const isAlreadyBooked = await Appointment.findOne({
+      doctorId,
+      date,
+      timeSlot,
+    });
+    if (isAlreadyBooked) return next(createError(409, "Slot already booked"));
+    // Add the new apoiment
+    const appointment = new Appointment({
+      patientId,
+      doctorId,
+      date,
+      timeSlot,
+      reason,
+    });
+    await appointment.save(); // Save the apoiment
+    res
+      .status(201)
+      .json({ message: "Appointment booked successfully", appointment });
+  } catch (error) {
+    next(error);
+  }
 };
