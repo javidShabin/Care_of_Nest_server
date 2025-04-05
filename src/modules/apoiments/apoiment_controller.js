@@ -152,7 +152,7 @@ export const rescheduleAppoinment = async (req, res, next) => {
       doctorId: appointment.doctorId,
       date: newDate,
       timeSlot: newTimeSlot,
-      reason: appointment.reason
+      reason: appointment.reason,
     });
     if (isAlreadyBooked) return next(createError(409, "Slot already booked"));
     // Update and save
@@ -162,6 +162,24 @@ export const rescheduleAppoinment = async (req, res, next) => {
     await appointment.save();
 
     res.status(200).json({ message: "Appointment rescheduled", appointment });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Update appoinment status by doctor
+export const updateAppointmentStatus = async (req, res, next) => {
+  const { appointmentId, status } = req.body; // completed / missed
+  try {
+    const appointment = await Appointment.findById(appointmentId);
+    if (!appointment) return next(createError(404, "Appointment not found"));
+
+    appointment.status = status;
+    await appointment.save();
+
+    res
+      .status(200)
+      .json({ message: "Appointment status updated", appointment });
   } catch (error) {
     next(error);
   }
