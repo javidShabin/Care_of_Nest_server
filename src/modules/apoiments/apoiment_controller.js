@@ -1,7 +1,7 @@
 import { createError } from "../../utils/createError.js";
 import Appointment from "../apoiments/apoiment_model.js";
 import Doctor from "../doctors/doctor_model.js";
-import { format, nextDay } from "date-fns";
+import { format } from "date-fns";
 
 // Get the doctor availability
 export const getDoctorAvailability = async (req, res, next) => {
@@ -129,6 +129,40 @@ export const cancelAppointment = async (req, res, next) => {
     res.status(200).json({ message: "Appointment cancelled successfully" });
   } catch (error) {
     console.error(error);
+    next(error);
+  }
+};
+
+// Reschedule appoinemtn
+export const rescheduleAppoinment = async (req, res, next) => {
+  // Destructer the needed fields
+  const { appointmentId, newDate, newTimeSlot } = req.body;
+  try {
+    // Find the appoinment by id
+    const appointment = await Appointment.findById(appointmentId);
+    if (!appointment) return next(createError(404, "Appointment not found"));
+
+    // Check if new slot is available and not booked
+    const doctor = await Doctor.findById(appointment.doctorId);
+    const isSlotValid = doctor.availability.some((day) =>
+      day.timeSlots.some((slot) => slot._id.toString() === newTimeSlot)
+    );
+    if (!isSlotValid) return next(createError(400, "Invalid time slot"));
+    const isAlreadyBooked = await Appointment.findOne({
+      doctorId: appointment.doctorId,
+      date: newDate,
+      timeSlot: newTimeSlot,
+      reason: appointment.reason
+    });
+    if (isAlreadyBooked) return next(createError(409, "Slot already booked"));
+    // Update and save
+    appointment.date = newDate;
+    appointment.timeSlot = newTimeSlot;
+    appointment.day = format(new Date(newDate), "EEEE");
+    await appointment.save();
+
+    res.status(200).json({ message: "Appointment rescheduled", appointment });
+  } catch (error) {
     next(error);
   }
 };
