@@ -73,7 +73,7 @@ export const getPatientAppointments = async (req, res, next) => {
   const patientId = req.patient.id;
   try {
     // Find apoiment by id
-    const appointments = await Appointment.find({ patientId })
+    const appointments = await Appointment.find({ patientId }).populate("doctorId", "fullName specialization").sort({ date: 1 })
     console.log(appointments)
   } catch (error) {
     
