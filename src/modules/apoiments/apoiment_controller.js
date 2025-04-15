@@ -1,7 +1,7 @@
 import { createError } from "../../utils/createError.js";
 import Appointment from "../apoiments/apoiment_model.js";
 import Doctor from "../doctors/doctor_model.js";
-import { format } from 'date-fns';
+import { format } from "date-fns";
 
 // Get the doctor availability
 export const getDoctorAvailability = async (req, res, next) => {
@@ -52,7 +52,7 @@ export const bookApoiment = async (req, res, next) => {
     });
     if (isAlreadyBooked) return next(createError(409, "Slot already booked"));
 
-    const apoimentDay = format(new Date(date), 'EEEE');
+    const apoimentDay = format(new Date(date), "EEEE");
     // Add the new apoiment
     const appointment = new Appointment({
       patientId,
@@ -77,9 +77,17 @@ export const getPatientAppointments = async (req, res, next) => {
   const patientId = req.patient.id;
   try {
     // Find apoiment by id
-    const appointments = await Appointment.find({ patientId }).populate("doctorId", "fullName specialization").sort({ date: 1 })
-    console.log(appointments)
+    const appointments = await Appointment.find({ patientId })
+      .populate("doctorId", "fullName specialization")
+      .sort({ date: 1 });
+    console.log(appointments);
+    if (!appointments) {
+      return next(createError(404, "Apoiment not found"))
+    }
+    // If find apoiments sedn as response
+    res.status(200).json(appointments);
   } catch (error) {
-    
+    console.error(error);
+    next(error)
   }
-}
+};
