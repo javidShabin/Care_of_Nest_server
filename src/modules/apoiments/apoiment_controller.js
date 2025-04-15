@@ -66,3 +66,16 @@ export const bookApoiment = async (req, res, next) => {
     next(error);
   }
 };
+
+// Get apoiment for patient
+export const getPatientAppointments = async (req, res, next) => {
+  // Get patient Id from authentication
+  const patientId = req.patient.id;
+  try {
+    // Find apoiment by id
+    const appointments = await Appointment.find({ patientId })
+    console.log(appointments)
+  } catch (error) {
+    
+  }
+}
