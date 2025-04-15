@@ -1,6 +1,7 @@
 import { createError } from "../../utils/createError.js";
 import Appointment from "../apoiments/apoiment_model.js";
 import Doctor from "../doctors/doctor_model.js";
+import { format } from 'date-fns';
 
 // Get the doctor availability
 export const getDoctorAvailability = async (req, res, next) => {
@@ -50,12 +51,15 @@ export const bookApoiment = async (req, res, next) => {
       timeSlot,
     });
     if (isAlreadyBooked) return next(createError(409, "Slot already booked"));
+
+    const apoimentDay = format(new Date(date), 'EEEE');
     // Add the new apoiment
     const appointment = new Appointment({
       patientId,
       doctorId,
       date,
       timeSlot,
+      day: apoimentDay,
       reason,
     });
     await appointment.save(); // Save the apoiment
