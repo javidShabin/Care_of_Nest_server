@@ -71,7 +71,7 @@ export const bookApoiment = async (req, res, next) => {
   }
 };
 
-// Get apoiment for patient
+// Get all apoiment for patient
 export const getPatientAppointments = async (req, res, next) => {
   // Get patient Id from authentication
   const patientId = req.patient.id;
@@ -91,3 +91,13 @@ export const getPatientAppointments = async (req, res, next) => {
     next(error)
   }
 };
+
+// Get all apoiment for doctor
+export const getDoctorAppointments = async (req, res, next) => {
+  const doctorId = req.doctor.id
+  try {
+    
+  } catch (error) {
+    
+  }
+}
