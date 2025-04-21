@@ -82,22 +82,32 @@ export const getPatientAppointments = async (req, res, next) => {
       .sort({ date: 1 });
     console.log(appointments);
     if (!appointments) {
-      return next(createError(404, "Apoiment not found"))
+      return next(createError(404, "Apoiment not found"));
     }
     // If find apoiments sedn as response
     res.status(200).json(appointments);
   } catch (error) {
     console.error(error);
-    next(error)
+    next(error);
   }
 };
 
 // Get all apoiment for doctor
 export const getDoctorAppointments = async (req, res, next) => {
-  const doctorId = req.doctor.id
+  // Get patient Id from authentication
+  const doctorId = req.doctor.id;
   try {
-    
+    // Find apoiment by doctor Id
+    const appointments = await Appointment.find({ doctorId })
+      .populate("patientId", "fullName email") // show patient details
+      .sort({ date: 1 });
+    if (!appointments) {
+      return next(createError(404, "Apoiment not found"));
+    }
+    // If find apoiments sedn as response
+    res.status(200).json(appointments);
   } catch (error) {
-    
+    console.error(error);
+    next(error);
   }
-}
+};
