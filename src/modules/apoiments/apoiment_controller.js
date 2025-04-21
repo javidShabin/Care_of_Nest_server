@@ -1,7 +1,7 @@
 import { createError } from "../../utils/createError.js";
 import Appointment from "../apoiments/apoiment_model.js";
 import Doctor from "../doctors/doctor_model.js";
-import { format } from "date-fns";
+import { format, nextDay } from "date-fns";
 
 // Get the doctor availability
 export const getDoctorAvailability = async (req, res, next) => {
@@ -23,7 +23,7 @@ export const getDoctorAvailability = async (req, res, next) => {
   }
 };
 
-// Book a apoiment
+// Book a appoinment
 export const bookApoiment = async (req, res, next) => {
   // Destructer the needed fields from request body
   const { doctorId, date, timeSlot, reason } = req.body;
@@ -71,7 +71,7 @@ export const bookApoiment = async (req, res, next) => {
   }
 };
 
-// Get all apoiment for patient
+// Get all appoinment for patient
 export const getPatientAppointments = async (req, res, next) => {
   // Get patient Id from authentication
   const patientId = req.patient.id;
@@ -92,7 +92,7 @@ export const getPatientAppointments = async (req, res, next) => {
   }
 };
 
-// Get all apoiment for doctor
+// Get all appoinment for doctor
 export const getDoctorAppointments = async (req, res, next) => {
   // Get patient Id from authentication
   const doctorId = req.doctor.id;
@@ -106,6 +106,27 @@ export const getDoctorAppointments = async (req, res, next) => {
     }
     // If find apoiments sedn as response
     res.status(200).json(appointments);
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
+};
+
+// Cancel appoinment
+export const cancelAppointment = async (req, res, next) => {
+  // Get appoinment id from request params
+  const { id } = req.params;
+  try {
+    // Find the appoinment by id
+    const appointment = await Appointment.findById(id);
+    if (!appointment) {
+      return next(createError(404, "Appointment not found"));
+    }
+    // Change the appoinment status
+    appointment.status = "cancelled";
+    await appointment.save(); // save the status
+
+    res.status(200).json({ message: "Appointment cancelled successfully" });
   } catch (error) {
     console.error(error);
     next(error);
