@@ -5,6 +5,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
 import { connectDb } from "./src/configs/database.js";
+import router from "./src/app.js";
 
 
 const PORT = 4000;
@@ -22,6 +23,8 @@ app.use(cookieParser()); // Cookie parser
 app.use("/", (req, res) => {
   res.json({message: "Hello world"})
 })
+
+app.use("/app", router)
 
 // Start the server
 connectDb()
