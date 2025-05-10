@@ -97,7 +97,91 @@ export const registerDoctor = async (req, res, next) => {
 };
 
 // Verify OTP and create a new doctor account
-export const verifyDoctorOtpAndCreateAccount = async (req, res, next) => {};
+export const verifyDoctorOtpAndCreateAccount = async (req, res, next) => {
+  // Destructer the emial and otp from request body
+  const { email, otp } = req.body;
+  try {
+    if (!email || !otp) {
+      return next(createError(404, "Email and OTP are required"));
+    }
+    // Find the temporary doctor by email
+    const tempDoctor = await TempDoctor.findOne({ email });
+    if (!tempDoctor) {
+      return next(createError(400, "Doctor not found"));
+    }
+    // Cnompare the OTP and compare the Expair time
+    if (tempDoctor.otp !== otp) {
+      return next(createError(400, "Invalid OTP"));
+    }
+    if (tempDoctor.otpExpiresAt < Date.now()) {
+      return next(createError(400, "OTP has expired"));
+    }
+
+    // If everuthing correct create the new doctor
+    const newDoctor = new Doctor({
+      fullName: tempDoctor.fullName,
+      email: tempDoctor.email,
+      password: tempDoctor.password,
+      phone: tempDoctor.phone,
+      gender: tempDoctor.gender,
+      specialization: tempDoctor.specialization,
+      profilePicture: tempDoctor.profilePicture,
+      experience: tempDoctor.experience,
+      qualifications: tempDoctor.qualifications,
+      availability: tempDoctor.availability,
+      consultationFee: tempDoctor.consultationFee,
+      socialLinks: tempDoctor.socialLinks,
+      timeSlots: tempDoctor.timeSlots,
+    });
+    await newDoctor.save();
+    // Generate doctor token using doctor id, email and role
+    const token = generateDoctorToken({
+      _id: newDoctor._id,
+      email: newDoctor.email,
+      role: "doctor",
+    });
+    res.cookie("doctorToken", token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "strict",
+    });
+    // Delete the temp patient from database
+    await tempDoctor.deleteOne({ email });
+    const mailOptions = {
+      from: process.env.EMAIL,
+      to: process.env.ADMIN_EMAIL, // Admin's email address
+      subject: "New Doctor Registration",
+      text: `A new doctor has registered:
+
+      Full Name: ${newDoctor.fullName}
+      Email: ${newDoctor.email}
+      Phone: ${newDoctor.phone}
+      Specialization: ${newDoctor.specialization}
+      Experience: ${newDoctor.experience} years
+
+      Please review their profile.`,
+    };
+    // Send the email
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.log("Error sending email:", error);
+      } else {
+        console.log("Email sent: " + info.response);
+      }
+    });
+    // Return a success response
+    res.status(201).json({
+      msg: "Doctor registered successfully",
+      doctor: newDoctor,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "OTP verification failed",
+      error: error.message,
+    });
+  }
+};
 
 // Login doctor
 export const loginDoctor = async (req, res, next) => {};
