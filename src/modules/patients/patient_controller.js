@@ -224,7 +224,9 @@ export const fetchPatientProfile = async (req, res, next) => {
 };
 
 // Update a patient's profile
-export const updatePatientProfile = async (req, res, next) => {};
+export const updatePatientProfile = async (req, res, next) => {
+  
+};
 
 // Send OTP for password reset
 export const sendForgotPasswordOtp = async (req, res, next) => {};
