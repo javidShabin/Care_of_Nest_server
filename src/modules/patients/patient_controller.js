@@ -278,11 +278,8 @@ export const updatePatientProfile = async (req, res, next) => {
     });
   } catch (error) {
     console.error("Error updating patient profile:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Internal server error",
-      error: error.message,
-    });
+    
+    next(error)
   }
 };
 
